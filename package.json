@@ -1,0 +1,39 @@
+{
+  "name": "express-mesto",
+  "version": "1.0.0",
+  "description": "Backend of project Mesto",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Aleksey-Gorodbin/express-mesto.git"
+  },
+  "author": "Alexey Gorodbin",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Aleksey-Gorodbin/express-mesto/issues"
+  },
+  "homepage": "https://github.com/Aleksey-Gorodbin/express-mesto#readme",
+  "devDependencies": {
+    "eslint": "^7.8.1",
+    "eslint-config-airbnb-base": "^14.2.0",
+    "eslint-plugin-import": "^2.22.0",
+    "nodemon": "^2.0.4"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.19.0",
+    "celebrate": "^13.0.3",
+    "express": "^4.17.1",
+    "express-winston": "^4.0.5",
+    "joi": "^17.2.1",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^5.10.5",
+    "npm": "^6.14.8",
+    "validator": "^13.1.17",
+    "winston": "^3.3.3"
+  }
+}
