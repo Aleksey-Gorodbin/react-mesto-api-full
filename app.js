@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const cors = require('cors');
 const { errors } = require('celebrate');
 const {
   routerUsersId,
@@ -41,6 +42,7 @@ app.get('/crash-test', () => {
     throw new Error('Сервер сейчас упадёт');
   }, 0);
 });
+app.use(cors());
 app.post('/signin', login);
 app.post('/signup', changeUser);
 app.use(auth);
