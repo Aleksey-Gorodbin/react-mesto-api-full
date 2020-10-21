@@ -64,4 +64,4 @@ app.use((err, req, res, next) => {
   res.status(500).send({ message: 'На сервере произошла ошибка' });
 });
 
-app.listen(PORT, ()=>{});
+app.listen(PORT);

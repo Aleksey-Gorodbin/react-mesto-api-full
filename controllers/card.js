@@ -1,49 +1,36 @@
 const Card = require('../models/card');
-const ErrorRequest = require('../errors/err-request');
-const NotFoundError = require('../errors/not-found-error');
 
-module.exports.getCards = (req, res, next) => {
+module.exports.getCards = (req, res) => {
   Card.find({})
     .populate('user')
-    .then((cards) => {
-      if (!cards) {
-        throw new ErrorRequest('Произошла ошибка');
-      }
-      res.send({ data: cards })
-    })
-    .catch(next);
+    .then((cards) => res.send({ data: cards }))
+    .catch(() => res.status(400).send({ message: 'Произошла ошибка' }));
 };
 
-module.exports.createCard = (req, res, next) => {
+module.exports.createCard = (req, res) => {
   const { name, link } = req.body;
   const userId = req.requestContext.user._id;
 
   Card.create({ name, link, owner: userId })
     .then((card) => {
+      res.send({ data: card });
+    })
+    .catch(() => res.status(400).send({ message: 'Произошла ошибка' }));
+};
+
+module.exports.deleteCard = (req, res) => {
+  Card.findByIdAndRemove(req.params._id)
+    .then((card) => {
       if (!card) {
-        throw new ErrorRequest('Произошла ошибка');
+        res.status(404).send({ message: 'Нет карточки с таким id' });
+        return;
       }
       res.send({ data: card });
     })
-    .catch(next);
+    .catch(() => res.status(400).send({ message: 'Произошла ошибка' }));
 };
 
-module.exports.deleteCard = (req, res, next) => {
-  Card.findByIdAndRemove(req.params._id)
-    .then((card) => {
-      try {
-        if (!card) {
-          throw new NotFoundError('Нет карточки с таким id');
-        }
-        res.send({ data: card });
-      } catch (e) {
-        throw new ErrorRequest('Произошла ошибка');
-      }
-    })
-    .catch(next);
-};
-
-module.exports.likeCard = (req, res, next) => {
+module.exports.likeCard = (req, res) => {
   const userId = req.requestContext.user._id;
 
   Card.findByIdAndUpdate(
@@ -51,20 +38,17 @@ module.exports.likeCard = (req, res, next) => {
     { $addToSet: { likes: userId } },
     { new: true },
   )
-  .then((card) => {
-    try {
+    .then((card) => {
       if (!card) {
-        throw new NotFoundError('Нет карточки с таким id');
+        res.status(404).send({ message: 'Нет карточки с таким id' });
+        return;
       }
       res.send({ data: card });
-    } catch (e) {
-      throw new ErrorRequest('Произошла ошибка');
-    }
-  })
-  .catch(next);
+    })
+    .catch(() => res.status(400).send({ message: 'Произошла ошибка' }));
 };
 
-module.exports.dislikeCard = (req, res, next) => {
+module.exports.dislikeCard = (req, res) => {
   const userId = req.requestContext.user._id;
 
   Card.findByIdAndUpdate(
@@ -72,15 +56,12 @@ module.exports.dislikeCard = (req, res, next) => {
     { $pull: { likes: userId } }, // убрать _id из массива
     { new: true },
   )
-  .then((card) => {
-    try {
+    .then((card) => {
       if (!card) {
-        throw new NotFoundError('Нет карточки с таким id');
+        res.status(404).send({ message: 'Нет карточки с таким id' });
+        return;
       }
       res.send({ data: card });
-    } catch (e) {
-      throw new ErrorRequest('Произошла ошибка');
-    }
-  })
-  .catch(next);
+    })
+    .catch(() => res.status(400).send({ message: 'Произошла ошибка' }));
 };

@@ -1,86 +1,66 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const ErrorRequest = require('../errors/err-request');
-const NotFoundError = require('../errors/not-found-error');
 
-module.exports.getUsers = (req, res, next) => {
+module.exports.getUsers = (req, res) => {
   User.find({})
-  .then((users) => {
-    if (!users) {
-      throw new ErrorRequest('Произошла ошибка');
-    }
-    res.send({ data: users })
-  })
-  .catch(next);
+    .then((users) => res.send({ data: users }))
+    .catch(() => res.status(400).send({ message: 'На сервере произошла ошибка' }));
 };
 
-module.exports.getUserId = (req, res, next) => {
+module.exports.getUserId = (req, res) => {
   User.findById(req.params._id)
-  .then((user) => {
-    try {
+    .then((user) => {
       if (!user) {
-        throw new NotFoundError('Нет карточки с таким id');
+        res.status(404).send({ message: 'Нет пользователя с таким id' });
+        return;
       }
       res.send({ data: user });
-    } catch (e) {
-      throw new ErrorRequest('Произошла ошибка');
-    }
-  })
-  .catch(next);
+    })
+    .catch(() => res.status(400).send({ message: 'Произошла ошибка' }));
 };
 
-module.exports.changeUser = (req, res, next) => {
+module.exports.changeUser = (req, res) => {
   const { name, about, avatar, email } = req.body;
   bcrypt.hash(req.body.password, 10)
     .then((hash) => User.create({ name, about, avatar, email, password: hash }))
     .then((user) => {
-      if (!user) {
-        throw new ErrorRequest('Произошла ошибка');
-      }
-      res.send({ data: user })
+      res.status(201).send({_id: user._id, email: user.email});
     })
-    .catch(next);
+    .catch((err) => {
+      res.status(400).send(err);
+    });
 };
 
-module.exports.updateUser = (req, res, next) => {
+module.exports.updateUser = (req, res) => {
   const { name, about } = req.body;
 
   User.findByIdAndUpdate(req.requestContext.user._id, { name, about }, {
     new: true,
   })
-  .then((user) => {
-    if (!user) {
-      throw new ErrorRequest('Произошла ошибка');
-    }
-    res.send({ data: user })
-  })
-  .catch(next);
+    .then((user) => res.send({ data: user }))
+    .catch(() => res.status(400).send({ message: 'Произошла ошибка' }));
 };
 
 module.exports.updateUserAvatar = (req, res, next) => {
   const { avatar } = req.body;
 
   User.findByIdAndUpdate(req.requestContext.user._id, { avatar })
-  .then((user) => {
-    if (!user) {
-      throw new ErrorRequest('Произошла ошибка');
-    }
-    res.send({ data: user })
-  })
-  .catch(next);
+  User.findByIdAndUpdate(req.requestContext.user._id, { avatar })
+    .then((user) => res.send({ data: user }))
+    .catch(() => res.status(400).send({ message: 'Произошла ошибка' }));
 };
 
-module.exports.login = (req, res, next) => {
+module.exports.login = (req, res) => {
   const { email, password } = req.body;
 
   return User.findUserByCredentials(email, password)
     .then((user) => {
-      if (!user) {
-        throw new ErrorRequest('Произошла ошибка');
-      }
-      const token = jwt.sign({ _id: user._id }, 'super-strong-secret', {expiresIn: '7d'});
-      res.send({ token });
+      res.send({
+        token: jwt.sign({ _id: user._id }, 'super-strong-secret', { expiresIn: '7d' }),
+      });
     })
-    .catch(next);
+    .catch((err) => {
+      res.status(401).send({ message: err.message });
+    });
 };
