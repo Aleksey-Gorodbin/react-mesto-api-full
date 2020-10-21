@@ -25,7 +25,7 @@ module.exports.changeUser = (req, res) => {
   bcrypt.hash(req.body.password, 10)
     .then((hash) => User.create({ name, about, avatar, email, password: hash }))
     .then((user) => {
-      res.status(201).send({_id: user._id, email: user.email});
+      res.status(201).send(user);
     })
     .catch((err) => {
       res.status(400).send(err);
