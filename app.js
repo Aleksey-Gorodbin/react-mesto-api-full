@@ -1,8 +1,10 @@
 const express = require('express');
 const mongoose = require('mongoose');
+require('dotenv').config();
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
 const cors = require('cors');
-const { errors } = require('celebrate');
+const { errors, celebrate, Joi } = require('celebrate');
 const {
   routerUsersId,
   routerUsers,
@@ -21,6 +23,7 @@ const {
 } = require('./controllers/user');
 const auth = require('./middlewares/auth');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
+const NotFoundError = require('./errors/not-found-error');
 
 const app = express();
 
@@ -43,8 +46,19 @@ app.get('/crash-test', () => {
   }, 0);
 });
 app.use(cors());
-app.post('/signin', login);
-app.post('/signup', changeUser);
+app.use(cookieParser());
+app.post('/signin', celebrate({
+  body: Joi.object().keys({
+    title: Joi.string().required().min(2).max(30),
+    text: Joi.string().required().min(2),
+  }),
+}), login);
+app.post('/signup', celebrate({
+  body: Joi.object().keys({
+    title: Joi.string().required().min(2).max(30),
+    text: Joi.string().required().min(2),
+  }),
+}), changeUser);
 app.use(auth);
 app.use(routerUsersId);
 app.use(routerUsers);
@@ -57,13 +71,13 @@ app.use(routerDelete);
 app.use(routerLike);
 app.use(routerDisLike);
 
-app.all('*', (req, res) => {
-  res.status(404).send({ message: 'Запрашиваемый ресурс не найден' });
+app.all('*', () => {
+  throw new NotFoundError('Роута не существует');
 });
 
 app.use(errors());
-app.use((err, req, res, next) => {
+app.use((err, req, res) => {
   res.status(500).send({ message: 'На сервере произошла ошибка' });
 });
 
-app.listen(PORT);
+app.listen(PORT, () => {});

@@ -20,9 +20,13 @@ module.exports.createCard = (req, res) => {
 
 module.exports.deleteCard = (req, res) => {
   Card.findByIdAndRemove(req.params._id)
+    .populate('user')
     .then((card) => {
       if (!card) {
         res.status(404).send({ message: 'Нет карточки с таким id' });
+        return;
+      } if (req.requestContext.user._id !== card.owner._id) {
+        res.status(403).send({ message: 'Нелязя удалять чужие карточки' });
         return;
       }
       res.send({ data: card });

@@ -8,7 +8,6 @@ const {
   getCards, createCard, deleteCard, likeCard, dislikeCard,
 } = require('../controllers/card');
 
-
 router.get('/cards', getCards);
 routerCreate.post('/cards', celebrate({
   body: Joi.object().keys({
@@ -18,14 +17,14 @@ routerCreate.post('/cards', celebrate({
 }), createCard);
 routerDelete.delete('/cards/:_id', celebrate({
   params: Joi.object().keys({
-    postId: Joi.string().alphanum().length(24),
+    postId: Joi.string().hex().length(24),
   }),
   headers: Joi.object().keys({
   }),
 }), deleteCard);
 routerLike.put('/cards/:_id/likes', celebrate({
   params: Joi.object().keys({
-    postId: Joi.string().alphanum().length(24),
+    postId: Joi.string().hex().length(24),
   }),
   headers: Joi.object().keys({
   }),
