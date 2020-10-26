@@ -2,7 +2,6 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-require('dotenv').config();
 const { celebrate, Joi } = require('celebrate');
 const { errors } = require('celebrate');
 const {
