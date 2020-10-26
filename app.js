@@ -1,10 +1,10 @@
 const express = require('express');
 const mongoose = require('mongoose');
-//require('dotenv').config();
 const bodyParser = require('body-parser');
-const cookieParser = require('cookie-parser');
 const cors = require('cors');
-const { errors, celebrate, Joi } = require('celebrate');
+require('dotenv').config();
+const { celebrate, Joi } = require('celebrate');
+const { errors } = require('celebrate');
 const {
   routerUsersId,
   routerUsers,
@@ -18,12 +18,14 @@ const {
   routerDisLike,
   routerLike,
 } = require('./routes/cards');
+
 const {
-  changeUser, login,
+  login,
+  changeUser,
 } = require('./controllers/user');
 const auth = require('./middlewares/auth');
-const { requestLogger, errorLogger } = require('./middlewares/logger');
 const NotFoundError = require('./errors/not-found-error');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const app = express();
 
@@ -38,25 +40,26 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cors());
 app.use(requestLogger);
-app.use(errorLogger);
 app.get('/crash-test', () => {
   setTimeout(() => {
     throw new Error('Сервер сейчас упадёт');
   }, 0);
 });
-app.use(cors());
-app.use(cookieParser());
 app.post('/signin', celebrate({
   body: Joi.object().keys({
-    title: Joi.string().required().min(2).max(30),
-    text: Joi.string().required().min(2),
+    password: Joi.string().required().min(2).max(30),
+    email: Joi.string().required().email(),
   }),
 }), login);
 app.post('/signup', celebrate({
   body: Joi.object().keys({
-    title: Joi.string().required().min(2).max(30),
-    text: Joi.string().required().min(2),
+    email: Joi.string().required().email(),
+    password: Joi.string().required().min(2),
+    name: Joi.string().min(2).max(30),
+    avatar: Joi.string().pattern(/https?:\/\/(www\.)?[a-z0-9/\S+]#?/i),
+    about: Joi.string().min(2).max(30),
   }),
 }), changeUser);
 app.use(auth);
@@ -64,20 +67,26 @@ app.use(routerUsersId);
 app.use(routerUsers);
 app.use(routerUpdateUser);
 app.use(routerUpdateUserAvatar);
-
 app.use(router);
 app.use(routerCreate);
 app.use(routerDelete);
 app.use(routerLike);
 app.use(routerDisLike);
-
-app.all('*', () => {
-  throw new NotFoundError('Роута не существует');
+app.all('*', (req, res, next) => {
+  next(new NotFoundError('Запрашиваемый ресурс не найден'));
 });
-
+app.use(errorLogger);
 app.use(errors());
 app.use((err, req, res) => {
-  res.status(500).send({ message: 'На сервере произошла ошибка' });
+  const { statusCode = 500, message } = err;
+
+  res
+    .status(statusCode)
+    .send({
+      message: statusCode === 500
+        ? 'На сервере произошла ошибка'
+        : message,
+    });
 });
 
-app.listen(PORT, () => {});
+app.listen(PORT);
