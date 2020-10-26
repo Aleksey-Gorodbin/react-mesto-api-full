@@ -36,7 +36,7 @@ module.exports.changeUser = (req, res, next) => {
     })
     .catch((e) => {
       if (e.name === 'MongoError') {
-        next(new ErrorConflict('Пользователь с таким email уже существует'));
+        next(new ErrorConflict({message: 'Пользователь с таким email уже существует'}));
       }
       next(new ErrorRequest('С запросом что-то не так'));
     });
