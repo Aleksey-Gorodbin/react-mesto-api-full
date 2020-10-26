@@ -17,6 +17,7 @@ module.exports.login = (req, res, next) => {
     .catch((e) => {
       if (e.name === 'Error') {
         next(new ErrorAutorization('Неправильные почта или пароль'));
+        return;
       }
       next(new ErrorRequest('С запросом что-то не так'));
     });
@@ -36,7 +37,8 @@ module.exports.changeUser = (req, res, next) => {
     })
     .catch((e) => {
       if (e.name === 'MongoError') {
-        next(new ErrorConflict({message: 'Пользователь с таким email уже существует'}));
+        next(new ErrorConflict('Пользователь с таким email уже существует'));
+        return;
       }
       next(new ErrorRequest('С запросом что-то не так'));
     });
