@@ -9,6 +9,7 @@ const {
   routerUsers,
   routerUpdateUser,
   routerUpdateUserAvatar,
+  routerUsersInfo,
 } = require('./routes/users');
 const {
   router,
@@ -62,6 +63,7 @@ app.post('/signup', celebrate({
   }),
 }), changeUser);
 app.use(auth);
+app.use(routerUsersInfo);
 app.use(routerUsersId);
 app.use(routerUsers);
 app.use(routerUpdateUser);

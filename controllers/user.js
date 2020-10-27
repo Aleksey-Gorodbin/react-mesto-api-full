@@ -69,6 +69,22 @@ module.exports.getUserId = (req, res, next) => {
     })
     .catch(next);
 };
+//-----------------------------------
+module.exports.getUserInfo = (req, res, next) => {
+  const userId = req.user._id;
+  User.findById(userId)
+    .then((user) => {
+      try {
+        if (!user) {
+          throw new NotFoundError('Нет пользователя с таким id');
+        }
+        res.send({ data: user });
+      } catch (error) {
+        throw new ErrorRequest('С запросом что-то не так');
+      }
+    })
+    .catch(next);
+};
 //-----------------------------------------------
 module.exports.updateUser = (req, res, next) => {
   const { name, about } = req.body;

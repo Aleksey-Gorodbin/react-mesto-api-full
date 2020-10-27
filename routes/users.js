@@ -3,8 +3,9 @@ const routerUsers = require('express').Router();
 const routerUsersId = require('express').Router();
 const routerUpdateUser = require('express').Router();
 const routerUpdateUserAvatar = require('express').Router();
+const routerUsersInfo = require('express').Router();
 const {
-  getUsers, getUserId, updateUser, updateUserAvatar,
+  getUsers, getUserId, updateUser, updateUserAvatar, getUserInfo,
 } = require('../controllers/user');
 
 routerUsers.get('/users', getUsers);
@@ -13,6 +14,7 @@ routerUsersId.get('/users/:_id', celebrate({
     _id: Joi.string().hex(),
   }),
 }), getUserId);
+routerUsersInfo.get('/users/info', getUserInfo);
 routerUpdateUser.patch('/users/me', celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30),
@@ -30,4 +32,5 @@ module.exports = {
   routerUsers,
   routerUpdateUser,
   routerUpdateUserAvatar,
+  routerUsersInfo
 };
