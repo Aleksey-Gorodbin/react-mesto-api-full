@@ -11,7 +11,7 @@ const {
 routerUsers.get('/users', getUsers);
 routerUsersId.get('/users/:_id', celebrate({
   params: Joi.object().keys({
-    _id: Joi.string().hex(),
+    _id: Joi.string().hex().length(24),
   }),
 }), getUserId);
 routerUsersInfo.get('/users/info', getUserInfo);
@@ -32,5 +32,5 @@ module.exports = {
   routerUsers,
   routerUpdateUser,
   routerUpdateUserAvatar,
-  routerUsersInfo
+  routerUsersInfo,
 };

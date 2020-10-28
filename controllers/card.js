@@ -1,7 +1,7 @@
 const Card = require('../models/card');
-const ErrorConflict = require('../errors/conflict-error');
 const ErrorRequest = require('../errors/error-request');
 const NotFoundError = require('../errors/not-found-error');
+const Forbidden = require('../errors/error-forbidden');
 
 module.exports.getCards = (req, res, next) => {
   Card.find({})
@@ -24,16 +24,12 @@ module.exports.createCard = (req, res, next) => {
 module.exports.deleteCard = (req, res, next) => {
   Card.findByIdAndRemove(req.params._id)
     .then((card) => {
-      try {
-        if (!card) {
-          throw new NotFoundError('Нет карточки с таким id');
-        } else if (!card.owner._id === req.user._id) {
-          throw new ErrorConflict('Нельзя удалять чужие карточки');
-        }
-        res.send({ data: card });
-      } catch (error) {
-        throw new ErrorRequest('С запросом что-то не так');
+      if (!card) {
+        throw new NotFoundError('Нет карточки с таким id');
+      } else if (!(card.owner === req.user._id)) {
+        throw new Forbidden('Нельзя удалять чужие карточки');
       }
+      res.send({ data: card });
     })
     .catch(next);
 };
@@ -47,14 +43,10 @@ module.exports.likeCard = (req, res, next) => {
     { new: true },
   )
     .then((card) => {
-      try {
-        if (!card) {
-          throw new NotFoundError('Нет карточки с таким id');
-        }
-        res.send({ data: card });
-      } catch (error) {
-        throw new ErrorRequest('С запросом что-то не так');
+      if (!card) {
+        throw new NotFoundError('Нет карточки с таким id');
       }
+      res.send({ data: card });
     })
     .catch(next);
 };
@@ -68,14 +60,10 @@ module.exports.dislikeCard = (req, res, next) => {
     { new: true },
   )
     .then((card) => {
-      try {
-        if (!card) {
-          throw new NotFoundError('Нет карточки с таким id');
-        }
-        res.send({ data: card });
-      } catch (error) {
-        throw new ErrorRequest('С запросом что-то не так');
+      if (!card) {
+        throw new NotFoundError('Нет карточки с таким id');
       }
+      res.send({ data: card });
     })
     .catch(next);
 };
